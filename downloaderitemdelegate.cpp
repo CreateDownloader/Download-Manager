@@ -29,5 +29,6 @@ void DownloaderItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
 }
 
 QSize DownloaderItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const{
+    Q_UNUSED(index);
     return option.widget->size();
 }

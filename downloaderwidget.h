@@ -1,7 +1,7 @@
 #ifndef DOWNLOADERWIDGET_H
 #define DOWNLOADERWIDGET_H
 
-#include <QTabWidget>
+#include <QTableView>
 #include <QTime>
 #include <QSortFilterProxyModel>
 
@@ -10,7 +10,7 @@
 #include "downloadprogresssingleconnect.h"
 
 
-class downloaderWidget : public QTabWidget{
+class downloaderWidget : public QTableView{
     Q_OBJECT
 public:
     downloaderWidget(QWidget *parent = 0);
@@ -28,7 +28,7 @@ public slots:
     void showDownloadedFileLocation(QModelIndex);
     void remove();
 private:
-    void setupTable();
+    void setup();
     DownloaderTable  *downloadTable = nullptr;
     DownloaderItemDelegate *downloadPainter = nullptr;
     QSortFilterProxyModel *proxy = nullptr;

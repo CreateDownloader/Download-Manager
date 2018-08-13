@@ -9,13 +9,14 @@
 #include <QPainter>
 #include <QFileDialog>
 #include <QDesktopServices>
+#include <QHBoxLayout>
 
 
 downloaderWidget::downloaderWidget(QWidget *parent)
-    : QTabWidget(parent){
+    : QTableView(parent){
     downloadTable = new DownloaderTable;
     downloadPainter = new DownloaderItemDelegate;
-    setupTable();
+    setup();
     load();
 }
 
@@ -23,30 +24,25 @@ downloaderWidget::~downloaderWidget(){
     save();
 }
 
-void downloaderWidget::setupTable(){
+void downloaderWidget::setup(){
     proxy = new QSortFilterProxyModel(this);
     proxy->setSourceModel(downloadTable);
     proxy->setFilterKeyColumn(0);
 
-    QTableView *dataViewer;
-    dataViewer = new QTableView;
-    dataViewer->setModel(proxy);
-    dataViewer->setSortingEnabled(true);
-    dataViewer->resizeColumnsToContents();
-    dataViewer->setSelectionBehavior(QAbstractItemView::SelectRows);
-    dataViewer->setSelectionMode(QAbstractItemView::SingleSelection);
-    dataViewer->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    dataViewer->setColumnWidth(0, 350);
-    dataViewer->setColumnWidth(1, 150);
-    dataViewer->setColumnWidth(2, 100);
-    dataViewer->setColumnWidth(3, 100);
-    dataViewer->horizontalHeader()->setStretchLastSection(true);
-    dataViewer->setItemDelegate(downloadPainter);
+    setModel(proxy);
+    setSortingEnabled(true);
+    resizeColumnsToContents();
+    setSelectionBehavior(QAbstractItemView::SelectRows);
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
+    setColumnWidth(0, 350);
+    setColumnWidth(1, 150);
+    setColumnWidth(2, 100);
+    setColumnWidth(3, 100);
+    horizontalHeader()->setStretchLastSection(true);
+    setItemDelegate(downloadPainter);
 
-    connect(dataViewer, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(showDownloadedFileLocation(QModelIndex)));
-
-    QIcon icon(":/resources/icons/data.png");
-    addTab(dataViewer, icon, "Data");
+    connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(showDownloadedFileLocation(QModelIndex)));
 }
 
 void downloaderWidget::Download(QUrl & url){
@@ -106,9 +102,8 @@ QString downloaderWidget::getDownloadLink(){
 }
 
 void downloaderWidget::remove(){
-    QTableView *findSelected = static_cast<QTableView*>(currentWidget());
-    QSortFilterProxyModel *proxySelected = static_cast<QSortFilterProxyModel*>(findSelected->model());
-    QItemSelectionModel *selectionModel = findSelected->selectionModel();
+    QSortFilterProxyModel *proxySelected = static_cast<QSortFilterProxyModel*>(this->model());
+    QItemSelectionModel *selectionModel = this->selectionModel();
 
     QModelIndexList indexies = selectionModel->selectedRows();
 
@@ -133,7 +128,7 @@ void downloaderWidget::setDownload(){
         QRegularExpressionMatch match = urlRegex.match(url);
 
         if(!match.hasMatch()){
-            QMessageBox::critical(this, "Error", "Incorrect URL");
+            QMessageBox::critical(this, "Error", "Incorrect URL", QMessageBox::Ok);
             return;
         }
 
