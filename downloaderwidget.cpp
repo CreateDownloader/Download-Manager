@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QHBoxLayout>
+#include <QCheckBox>
 
 
 downloaderWidget::downloaderWidget(QWidget *parent)
@@ -79,7 +80,7 @@ QString downloaderWidget::saveFileName(QUrl & url){
     return filename;
 }
 
-bool downloaderWidget::saveToDisk(const QString & filename, QIODevice * data){
+bool downloaderWidget::saveToDisk(const QString & filename, QIODevice *data){
     QFile file(filename);
     if(!file.open(QIODevice::WriteOnly)) return false;
     file.write(data->readAll());
@@ -102,14 +103,34 @@ QString downloaderWidget::getDownloadLink(){
 }
 
 void downloaderWidget::remove(){
+    if(downloadTable->rowCount(QModelIndex()) == 0) return;
+
     QSortFilterProxyModel *proxySelected = static_cast<QSortFilterProxyModel*>(this->model());
     QItemSelectionModel *selectionModel = this->selectionModel();
 
     QModelIndexList indexies = selectionModel->selectedRows();
 
-    foreach(QModelIndex index, indexies){
-        int row = proxySelected->mapToSource(index).row();
+    QModelIndex indexToRemove = indexies[0];
+    int row = proxySelected->mapToSource(indexToRemove).row();
+
+    QModelIndex indexWithItemName = downloadTable->index(row, 0, QModelIndex());
+    QString fileName = downloadTable->data(indexWithItemName, Qt::DisplayRole).toString();
+
+    QMessageBox questionBox;
+    questionBox.setText(tr("Remove %1?").arg(fileName));
+    questionBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    questionBox.resize(550, 300);
+
+    auto removeFilesCheckBox = new QCheckBox("Remove file");
+    questionBox.setCheckBox(removeFilesCheckBox);
+
+    auto reply = questionBox.exec();
+    if(reply == QMessageBox::Yes){
         downloadTable->removeRows(row, 1, QModelIndex());
+        if(questionBox.checkBox()->checkState() == Qt::Checked){
+            QDir fileRemover;
+            fileRemover.remove(fileRemover.filePath(fileName));
+        }
     }
 }
 

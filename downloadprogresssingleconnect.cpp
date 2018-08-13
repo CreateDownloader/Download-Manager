@@ -49,27 +49,27 @@ QString DownloadProgressSingleConnect::timeHuman(const int secondsToFinishDownlo
 }
 
 void DownloadProgressSingleConnect::downloadProgress(qint64 received, qint64 total){
-    double downloadSpeed = received * 1000.0 / downloadTime.elapsed();
+    double downloadSpeedInfo = received * 1000.0 / downloadTime.elapsed();
+    double downloadSpeed  = downloadSpeedInfo;
     int progress = (100*received)/total;
     size = sizeHuman(total);
 
     QString unit;
-    if(downloadSpeed < 1024) unit = "bytes/sec";
-    else if(downloadSpeed < 1024 * 1024){
-        downloadSpeed /= 1024;
+    if(downloadSpeedInfo < 1024) unit = "bytes/sec";
+    else if(downloadSpeedInfo < 1024 * 1024){
+        downloadSpeedInfo /= 1024;
         unit = "kB/s";
     }else{
-        downloadSpeed /= (1024 * 1024);
+        downloadSpeedInfo /= (1024 * 1024);
         unit = "MB/s";
     }
 
     QString speedFormat;
-    speedFormat.sprintf("%6.2f", downloadSpeed);
+    speedFormat.sprintf("%6.2f", downloadSpeedInfo);
 
     QString speed = speedFormat+ " " + unit;
 
     int secondsToFinishDownload = total/downloadSpeed;
-    secondsToFinishDownload/=1000;
     QString timeLeft = timeHuman(secondsToFinishDownload);
 
     QString filenameToFind = url.fileName();
