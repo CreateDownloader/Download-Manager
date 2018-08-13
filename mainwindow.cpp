@@ -1,22 +1,34 @@
 #include "mainwindow.h"
 
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QDesktopWidget>
 #include <QPropertyAnimation>
-#include <QFile>
-#include <QGuiApplication>
+#include <QApplication>
 #include <QRect>
 
 
 MainWindow::MainWindow(){
     downloader = new downloaderWidget;
     setCentralWidget(downloader);
-
     setup();
+    startUpAnimation();
+}
 
-    QPropertyAnimation * animation = new QPropertyAnimation(this, "size");
-    animation->setDuration(350);
-    animation->setEndValue(QSize(920, 480));
-    animation->start();
+void MainWindow::startUpAnimation(){
+    QPropertyAnimation *fadein_animation = new QPropertyAnimation(this, "windowOpacity", this);
+    fadein_animation->setStartValue(0);
+    fadein_animation->setEndValue(1);
+    fadein_animation->setDuration(410);
+
+    QRect desktop = QApplication::desktop()->screenGeometry();
+    QPoint point = desktop.center();
+
+    QPropertyAnimation *move_animation = new QPropertyAnimation(this, "geometry");
+    move_animation->setDuration(400);
+    move_animation->setEndValue(QRect(point.x() - 1000 * 0.5, point.y() - 600 * 0.5, 1000, 600));
+
+    fadein_animation->start();
+    move_animation->start();
 }
 
 void MainWindow::startDownload(){

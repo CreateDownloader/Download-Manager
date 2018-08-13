@@ -12,6 +12,8 @@ public:
     MainWindow();
 public slots:
     void startDownload();
+protected:
+    void startUpAnimation();
 private:
     downloaderWidget *downloader = nullptr;
     void setup();
