@@ -1,7 +1,6 @@
-#include "downloaderwidget.h"
-#include "newdownloaddialog.h"
+#include "downloadwidget.h"
+#include "downloaddialog.h"
 
-#include <QFileInfo>
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QTableView>
@@ -13,19 +12,20 @@
 #include <QCheckBox>
 
 
-downloaderWidget::downloaderWidget(QWidget *parent)
+DownloadWidget::DownloadWidget(QWidget *parent)
     : QTableView(parent){
-    downloadTable = new DownloaderTable;
-    downloadPainter = new DownloaderItemDelegate;
+    downloadTable = new DownloadTable;
+    downloadPainter = new DownloadItemDelegate;
+
     setup();
     load();
 }
 
-downloaderWidget::~downloaderWidget(){
+DownloadWidget::~DownloadWidget(){
     save();
 }
 
-void downloaderWidget::setup(){
+void DownloadWidget::setup(){
     proxy = new QSortFilterProxyModel(this);
     proxy->setSourceModel(downloadTable);
     proxy->setFilterKeyColumn(0);
@@ -46,26 +46,32 @@ void downloaderWidget::setup(){
     connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(showDownloadedFileLocation(QModelIndex)));
 }
 
-void downloaderWidget::Download(QUrl & url){
-    DownloadProgressSingleConnect *downloadProcess;
-    downloadProcess = new DownloadProgressSingleConnect(url, downloadTable);
+QPair<int, QString> DownloadWidget::currentSelectedRowWithFilename(){
+    QSortFilterProxyModel *proxySelected = static_cast<QSortFilterProxyModel*>(this->model());
+    QItemSelectionModel *selectionModel = this->selectionModel();
+
+    QModelIndexList indexies = selectionModel->selectedRows();
+
+    QModelIndex indexToRemove = indexies[0];
+    int row = proxySelected->mapToSource(indexToRemove).row();
+
+    QModelIndex indexWithItemName = downloadTable->index(row, 0, QModelIndex());
+    QString filename = downloadTable->data(indexWithItemName, Qt::DisplayRole).toString();
+
+    return QPair<int, QString>(row, filename);
+}
+
+void DownloadWidget::download(QUrl &url){
+    DownloadProcess *downloadProcess;
+    downloadProcess = new DownloadProcess(url, downloadTable);
+    downloadProcess->start();
+
+    downloads[url.fileName()] = downloadProcess;
 
     connect(downloadProcess, SIGNAL(downloadFinished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
-
-    downloads.append(downloadProcess);
 }
 
-void downloaderWidget::showDownloadedFileLocation(QModelIndex index){
-    QFileDialog fileDialog(this, tr("Open file"), QDir::homePath());
-    QModelIndex currentIndex = downloadTable->index(index.row(), 0, QModelIndex());
-    QString downloadedFileName = downloadTable->data(currentIndex, Qt::DisplayRole).toString();
-    fileDialog.selectFile(downloadedFileName);
-    auto fileDialogCode = fileDialog.exec();
-    if(fileDialogCode != QFileDialog::AcceptOpen) QDesktopServices::openUrl(downloadedFileName);
-}
-
-
-QString downloaderWidget::saveFileName(QUrl & url){
+QString DownloadWidget::saveFileName(QUrl & url){
     QString path = url.path();
     QString filename = QFileInfo(path).fileName();
 
@@ -80,44 +86,37 @@ QString downloaderWidget::saveFileName(QUrl & url){
     return filename;
 }
 
-bool downloaderWidget::saveToDisk(const QString & filename, QIODevice *data){
-    QFile file(filename);
-    if(!file.open(QIODevice::WriteOnly)) return false;
-    file.write(data->readAll());
-    file.close();
-    return true;
+void DownloadWidget::showDownloadedFileLocation(QModelIndex index){
+    Q_UNUSED(index);
+
+    auto selected = currentSelectedRowWithFilename();
+    QString filename = selected.second;
+
+    QFileDialog fileDialog(this, tr("Open file"), QDir::homePath());
+    fileDialog.selectFile(filename);
+    auto fileDialogCode = fileDialog.exec();
+
+    if(fileDialogCode != QFileDialog::AcceptOpen) QDesktopServices::openUrl(filename);
 }
 
-bool downloaderWidget::isHttpRedricted(QNetworkReply * reply){
-    int httpCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    return httpCode == 301 || httpCode == 302 || httpCode == 303
-            || httpCode == 305 || httpCode == 307 || httpCode == 308;
+QString DownloadWidget::getDownloadUrl(){
+    DownloadDialog dialog;
+    QString getUrl;
+
+    if(dialog.exec()) getUrl = dialog.downloadUrl->text();
+
+    return getUrl;
 }
 
-QString downloaderWidget::getDownloadLink(){
-    newDownloadDialog dialog;
-    QString getLinkToData;
-
-    if(dialog.exec()) getLinkToData = dialog.linkToData->text();
-    return getLinkToData;
-}
-
-void downloaderWidget::remove(){
+void DownloadWidget::remove(){
     if(downloadTable->rowCount(QModelIndex()) == 0) return;
 
-    QSortFilterProxyModel *proxySelected = static_cast<QSortFilterProxyModel*>(this->model());
-    QItemSelectionModel *selectionModel = this->selectionModel();
-
-    QModelIndexList indexies = selectionModel->selectedRows();
-
-    QModelIndex indexToRemove = indexies[0];
-    int row = proxySelected->mapToSource(indexToRemove).row();
-
-    QModelIndex indexWithItemName = downloadTable->index(row, 0, QModelIndex());
-    QString fileName = downloadTable->data(indexWithItemName, Qt::DisplayRole).toString();
+    auto selected = currentSelectedRowWithFilename();
+    int row = selected.first;
+    QString filename = selected.second;
 
     QMessageBox questionBox;
-    questionBox.setText(tr("Remove %1?").arg(fileName));
+    questionBox.setText(tr("Remove %1?").arg(filename));
     questionBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     questionBox.resize(550, 300);
 
@@ -126,76 +125,82 @@ void downloaderWidget::remove(){
 
     auto reply = questionBox.exec();
     if(reply == QMessageBox::Yes){
+        if(downloads.contains(filename)) downloads.remove(filename);
         downloadTable->removeRows(row, 1, QModelIndex());
+
         if(questionBox.checkBox()->checkState() == Qt::Checked){
             QDir fileRemover;
-            fileRemover.remove(fileRemover.filePath(fileName));
+            fileRemover.remove(fileRemover.filePath(filename));
         }
     }
 }
 
-void downloaderWidget::setDownload(){
-    QString url = getDownloadLink();
-    QUrl urlToData = QUrl::fromEncoded(url.toLocal8Bit());
+bool DownloadWidget::saveToDisk(const QString & filename, QIODevice *data){
+    QFile file(filename);
 
-    if(downloadTable->checkForDuplicateName(urlToData.fileName())){
+    if(!file.open(QIODevice::WriteOnly)) return false;
+    file.write(data->readAll());
+    file.close();
+
+    return true;
+}
+
+void DownloadWidget::insertDownloadingFilenameInTable(const QString filename){
+    downloadTable->insertRows(0, 1, QModelIndex());
+    QModelIndex index = downloadTable->index(0, 0, QModelIndex());
+    downloadTable->setData(index, filename, Qt::EditRole);
+}
+
+void DownloadWidget::setupDownload(){
+    QString downloadUrl = getDownloadUrl();
+    QUrl url = QUrl::fromEncoded(downloadUrl.toLocal8Bit());
+
+    if(downloads.contains(url.fileName())){
         QMessageBox::information(this, "Duplicate data!",
-                                 tr("There is %1 already in downloads!").arg(urlToData.fileName()));
+                                 tr("There is %1 already in downloads!").arg(url.fileName()));
         return;
     }
 
-    if(!url.isEmpty()){
+    if(!downloadUrl.isEmpty()){
         QRegularExpression urlRegex("^(?:http|ftp)s?://");
-        QRegularExpressionMatch match = urlRegex.match(url);
+        QRegularExpressionMatch match = urlRegex.match(downloadUrl);
 
         if(!match.hasMatch()){
             QMessageBox::critical(this, "Error", "Incorrect URL", QMessageBox::Ok);
             return;
         }
 
-        downloadTable->insertRows(0, 1, QModelIndex());
-        QModelIndex index = downloadTable->index(0, 0, QModelIndex());
-        downloadTable->setData(index, urlToData.fileName(), Qt::EditRole);
-
-        Download(urlToData);
+        insertDownloadingFilenameInTable(url.fileName());
+        download(url);
     }
 }
 
-void downloaderWidget::downloadFinished(QNetworkReply * reply){
+bool DownloadWidget::isHttpRedricted(QNetworkReply *reply){
+    int httpCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+    return httpCode == 301 || httpCode == 302 || httpCode == 303
+            || httpCode == 305 || httpCode == 307 || httpCode == 308;
+}
+
+void DownloadWidget::downloadFinished(QNetworkReply *reply){
     QUrl url = reply->url();
 
-    for(int i = 0; i<downloads.size(); i++){
-            if(downloads.at(i)->getUrl() == url){
-                downloads.remove(i);
-                break;
-        }
-    }
-
     if(!reply->error()){
-        if(!isHttpRedricted(reply)){
+        if(isHttpRedricted(reply)) QMessageBox::information(this, "Redricted", "HTTP Redricted");
+        else{
             QString filename = saveFileName(url);
-
-            int row = downloadTable->getRowOfDownloadByName(filename);
-            QModelIndex index = downloadTable->index(row, 4, QModelIndex());
-            downloadTable->setData(index, "00:00:00", Qt::EditRole);
-
             if(saveToDisk(filename, reply))
                 QMessageBox::information(this, "Download successed!", tr("Download of %1 succesed!").arg(filename));
-        }else{
-            downloadTable->removeRows(0, 1, QModelIndex());
-            QMessageBox::information(this, "Http Redricted", tr("HTTP Error"));
-       }
-    }else{
-        downloadTable->removeRows(0, 1, QModelIndex());
-        QMessageBox::information(this, "Download Error", tr("Download error %1").arg(url.errorString()));
-    }
+        }
+    } else QMessageBox::warning(this, "Error", tr("Download error %1").arg(reply->errorString()));
 }
 
-void downloaderWidget::save(){
-    QFile file(".download_data");
+void DownloadWidget::save(){
+    QFile file(".downloadSession");
 
     if(file.open(QIODevice::WriteOnly)){
         QDataStream stream(&file);
+
         int n = downloadTable->rowCount(QModelIndex());
         int m = downloadTable->columnCount(QModelIndex());
         QModelIndex index;
@@ -212,11 +217,12 @@ void downloaderWidget::save(){
     file.close();
 }
 
-void downloaderWidget::load(){
-    QFile file(".download_data");
+void DownloadWidget::load(){
+    QFile file(".downloadSession");
 
     if(file.open(QIODevice::ReadOnly)){
         QDataStream stream(&file);
+
         int n, m;
         stream >> n >> m;
         downloadTable->insertRows(0, n, QModelIndex());
