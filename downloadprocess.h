@@ -1,7 +1,8 @@
 #ifndef DOWNLOADPROGRESSSINGLECONNECT_H
 #define DOWNLOADPROGRESSSINGLECONNECT_H
 
-#include "downloadertable.h"
+#include "downloadtable.h"
+
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkAccessManager>
@@ -10,11 +11,12 @@
 #include <QUrl>
 
 
-class DownloadProgressSingleConnect : public QObject{
+class DownloadProcess : public QObject{
     Q_OBJECT
 public:
-    DownloadProgressSingleConnect(QUrl, DownloaderTable*);
-    const QUrl & getUrl() const;
+    DownloadProcess(QUrl, DownloadTable*);
+    void start();
+    const QUrl &getUrl() const;
 signals:
     void downloadFinished(QNetworkReply*);
 public slots:
@@ -23,10 +25,12 @@ protected:
     QString timeHuman(const int);
     QString sizeHuman(const qint64);
 private:
-    QString size;
-    DownloaderTable *dataModel = nullptr;
-    QTime downloadTime;
+    DownloadTable *dataModel = nullptr;
     QUrl url;
+    QString size;
+    QTime downloadTime;
+    QNetworkReply *currentDownload = nullptr;
+    QNetworkAccessManager *manager = nullptr;
 };
 
 #endif // DOWNLOADPROGRESSSINGLECONNECT_H

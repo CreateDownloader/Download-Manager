@@ -7,11 +7,11 @@
 #include <QPushButton>
 
 
-class newDownloadDialog : public QDialog{
+class DownloadDialog : public QDialog{
     Q_OBJECT
 public:
-    newDownloadDialog();
-    QLineEdit *linkToData = nullptr;
+    DownloadDialog();
+    QLineEdit *downloadUrl = nullptr;
 private:
     void setup();
 };

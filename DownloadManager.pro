@@ -5,20 +5,20 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 HEADERS += \
     mainwindow.h \
-    downloaderwidget.h \
-    downloadertable.h \
-    downloaderitemdelegate.h \
-    newdownloaddialog.h \
-    downloadprogresssingleconnect.h
+    downloaddialog.h \
+    downloadprocess.h \
+    downloadtable.h \
+    downloadwidget.h \
+    downloaditemdelegate.h
 
 SOURCES += \
     mainwindow.cpp \
     main.cpp \
-    downloaderwidget.cpp \
-    downloadertable.cpp \
-    downloaderitemdelegate.cpp \
-    newdownloaddialog.cpp \
-    downloadprogresssingleconnect.cpp
+    downloaddialog.cpp \
+    downloadprocess.cpp \
+    downloadwidget.cpp \
+    downloadtable.cpp \
+    downloaditemdelegate.cpp
 
 RESOURCES += \
     icons.qrc

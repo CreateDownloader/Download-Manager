@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "downloaderwidget.h"
+#include "downloadwidget.h"
 
 
 class MainWindow : public QMainWindow{
@@ -11,12 +11,15 @@ class MainWindow : public QMainWindow{
 public:
     MainWindow();
 public slots:
-    void startDownload();
+    void addDownload();
+    void removeDownload();
 protected:
     void startUpAnimation();
 private:
-    downloaderWidget *downloader = nullptr;
+    DownloadWidget *downloader = nullptr;
     void setup();
+    QAction *add = nullptr;
+    QAction *remove = nullptr;
 
 };
 

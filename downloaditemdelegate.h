@@ -4,10 +4,10 @@
 #include <QStyledItemDelegate>
 
 
-class DownloaderItemDelegate : public QStyledItemDelegate{
+class DownloadItemDelegate : public QStyledItemDelegate{
     Q_OBJECT
 public:
-    DownloaderItemDelegate(QObject * parent = 0);
+    DownloadItemDelegate(QObject *parent = nullptr);
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };

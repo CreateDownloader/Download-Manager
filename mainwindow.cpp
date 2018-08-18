@@ -5,10 +5,12 @@
 #include <QPropertyAnimation>
 #include <QApplication>
 #include <QRect>
+#include <QStatusBar>
 
 
 MainWindow::MainWindow(){
-    downloader = new downloaderWidget;
+    downloader = new DownloadWidget;
+    setWindowTitle("Download Manager");
     setCentralWidget(downloader);
     setup();
     startUpAnimation();
@@ -31,28 +33,31 @@ void MainWindow::startUpAnimation(){
     move_animation->start();
 }
 
-void MainWindow::startDownload(){
-    downloader->setDownload();
+void MainWindow::addDownload(){
+    downloader->setupDownload();
+}
+
+void MainWindow::removeDownload(){
+    downloader->remove();
 }
 
 void MainWindow::setup(){
-    QMenu *downloadMenu = menuBar()->addMenu("Download");
+    QMenu *fileMenu = menuBar()->addMenu("File");
 
-    auto addDownload = new QAction("New", this);
-    downloadMenu->addAction(addDownload);
-    addDownload->setShortcut(QKeySequence::New);
-    connect(addDownload, SIGNAL(triggered(bool)), this, SLOT(startDownload()));
+    add = new QAction("New", this);
+    fileMenu->addAction(add);
+    add->setShortcut(QKeySequence::New);
+    connect(add, SIGNAL(triggered(bool)), this, SLOT(addDownload()));
 
-    auto remove = new QAction("Remove", this);
-    downloadMenu->addAction(remove);
+    remove = new QAction("Remove", this);
+    fileMenu->addAction(remove);
     remove->setShortcut(QKeySequence::Delete);
-    connect(remove, SIGNAL(triggered(bool)), downloader, SLOT(remove()));
+    connect(remove, SIGNAL(triggered(bool)), this, SLOT(removeDownload()));
 
-    downloadMenu->addSeparator();
+    fileMenu->addSeparator();
 
     auto exitFromProgram = new QAction("Exit", this);
-    downloadMenu->addAction(exitFromProgram);
+    fileMenu->addAction(exitFromProgram);
     exitFromProgram->setShortcut(QKeySequence::Quit);
     connect(exitFromProgram, SIGNAL(triggered(bool)), this, SLOT(close()));
 }
-

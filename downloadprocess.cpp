@@ -1,24 +1,24 @@
-#include "downloadprogresssingleconnect.h"
+#include "downloadprocess.h"
 
 
-DownloadProgressSingleConnect::DownloadProgressSingleConnect(QUrl url, DownloaderTable *dataModel){
+DownloadProcess::DownloadProcess(QUrl url, DownloadTable *dataModel){
     this->dataModel = dataModel;
     this->url = url;
 
-    QNetworkRequest request(url);
-    QNetworkReply *currentDownload;
-
-    QNetworkAccessManager * manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(downloadFinished(QNetworkReply*)));
-
-    currentDownload = manager->get(request);
-
-    connect(currentDownload, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64)));
-
-    downloadTime.start();
+    manager = new QNetworkAccessManager(this);
 }
 
-QString DownloadProgressSingleConnect::sizeHuman(qint64 fileSize){
+void DownloadProcess::start(){
+    QNetworkRequest request(url);
+    currentDownload = manager->get(request);
+
+    downloadTime.start();
+
+    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(downloadFinished(QNetworkReply*)));
+    connect(currentDownload, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64)));
+}
+
+QString DownloadProcess::sizeHuman(qint64 fileSize){
     QStringList sizeExt;
     sizeExt << "KB" << "MB" << "GB" << "TB";
 
@@ -35,7 +35,7 @@ QString DownloadProgressSingleConnect::sizeHuman(qint64 fileSize){
     return QString().setNum(num, 'f', 2) + " " + units;
 }
 
-QString DownloadProgressSingleConnect::timeHuman(const int secondsToFinishDownload){
+QString DownloadProcess::timeHuman(const int secondsToFinishDownload){
     int seconds = secondsToFinishDownload%60;
     int minutes = secondsToFinishDownload/60;
     int hours = minutes/60;
@@ -48,7 +48,7 @@ QString DownloadProgressSingleConnect::timeHuman(const int secondsToFinishDownlo
     return hoursFormat + ":" + minutesFormat + ":" + secondsFormat;
 }
 
-void DownloadProgressSingleConnect::downloadProgress(qint64 received, qint64 total){
+void DownloadProcess::downloadProgress(qint64 received, qint64 total){
     double downloadSpeedInfo = received * 1000.0 / downloadTime.elapsed();
     double downloadSpeed  = downloadSpeedInfo;
     int progress = (100*received)/total;
@@ -69,7 +69,7 @@ void DownloadProgressSingleConnect::downloadProgress(qint64 received, qint64 tot
 
     QString speed = speedFormat+ " " + unit;
 
-    int secondsToFinishDownload = total/downloadSpeed;
+    int secondsToFinishDownload = (total-received)/downloadSpeed;
     QString timeLeft = timeHuman(secondsToFinishDownload);
 
     QString filenameToFind = url.fileName();
@@ -88,9 +88,6 @@ void DownloadProgressSingleConnect::downloadProgress(qint64 received, qint64 tot
     dataModel->setData(index, timeLeft, Qt::EditRole);
 }
 
-const QUrl & DownloadProgressSingleConnect::getUrl() const{
+const QUrl & DownloadProcess::getUrl() const{
     return url;
 }
-
-
-

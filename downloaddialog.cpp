@@ -1,21 +1,21 @@
-#include "newdownloaddialog.h"
+#include "downloaddialog.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
 
-newDownloadDialog::newDownloadDialog(){
+DownloadDialog::DownloadDialog(){
     setup();
 }
 
-void newDownloadDialog::setup(){
+void DownloadDialog::setup(){
     QGridLayout *dataLayout;
     dataLayout = new QGridLayout;
 
-    linkToData = new QLineEdit;
-    linkToData->setPlaceholderText(tr("URL"));
-    dataLayout->addWidget(linkToData, 0, 1);
+    downloadUrl = new QLineEdit;
+    downloadUrl->setPlaceholderText(tr("Download url"));
+    dataLayout->addWidget(downloadUrl, 0, 1);
 
     QHBoxLayout *buttonsLayout;
     buttonsLayout = new QHBoxLayout;
@@ -31,10 +31,10 @@ void newDownloadDialog::setup(){
     mainLayout = new QVBoxLayout;
     mainLayout->addLayout(dataLayout);
 
-    connect(okButton, SIGNAL(clicked(bool)), this, SLOT(accept()));
-    connect(cancelButton, SIGNAL(clicked(bool)), this, SLOT(reject()));
-
     setWindowTitle(tr("New Download"));
     resize(270, 100);
     setLayout(mainLayout);
+
+    connect(okButton, SIGNAL(clicked(bool)), this, SLOT(accept()));
+    connect(cancelButton, SIGNAL(clicked(bool)), this, SLOT(reject()));
 }
