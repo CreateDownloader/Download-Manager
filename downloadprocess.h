@@ -16,6 +16,7 @@ class DownloadProcess : public QObject{
 public:
     DownloadProcess(QUrl, DownloadTable*);
     void start();
+    void abort();
     const QUrl &getUrl() const;
 signals:
     void downloadFinished(QNetworkReply*);

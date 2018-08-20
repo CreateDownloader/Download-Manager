@@ -16,6 +16,39 @@ MainWindow::MainWindow(){
     startUpAnimation();
 }
 
+void MainWindow::setup(){
+    QMenu *fileMenu = menuBar()->addMenu("File");
+
+    add = new QAction("New", this);
+    fileMenu->addAction(add);
+    add->setShortcut(QKeySequence::New);
+    connect(add, SIGNAL(triggered(bool)), downloader, SLOT(start()));
+
+    remove = new QAction("Remove", this);
+    fileMenu->addAction(remove);
+    remove->setShortcut(QKeySequence::Delete);
+    connect(remove, SIGNAL(triggered(bool)), downloader, SLOT(remove()));
+
+    fileMenu->addSeparator();
+
+    auto exitFromProgram = new QAction("Exit", this);
+    fileMenu->addAction(exitFromProgram);
+    exitFromProgram->setShortcut(QKeySequence::Quit);
+    connect(exitFromProgram, SIGNAL(triggered(bool)), this, SLOT(close()));
+
+    QMenu *downloadMenu = menuBar()->addMenu("Download");
+
+    resume = new QAction("Resume", this);
+    downloadMenu->addAction(resume);
+    resume->setShortcut(QKeySequence("CTRL+R"));
+    connect(resume, SIGNAL(triggered(bool)), downloader, SLOT(resume()));
+
+    abort = new QAction("Abort", this);
+    downloadMenu->addAction(abort);
+    abort->setShortcut(QKeySequence("CTRL+A"));
+    connect(abort, SIGNAL(triggered(bool)), downloader, SLOT(abort()));
+}
+
 void MainWindow::startUpAnimation(){
     QPropertyAnimation *fadein_animation = new QPropertyAnimation(this, "windowOpacity", this);
     fadein_animation->setStartValue(0);
@@ -31,33 +64,4 @@ void MainWindow::startUpAnimation(){
 
     fadein_animation->start();
     move_animation->start();
-}
-
-void MainWindow::addDownload(){
-    downloader->setupDownload();
-}
-
-void MainWindow::removeDownload(){
-    downloader->remove();
-}
-
-void MainWindow::setup(){
-    QMenu *fileMenu = menuBar()->addMenu("File");
-
-    add = new QAction("New", this);
-    fileMenu->addAction(add);
-    add->setShortcut(QKeySequence::New);
-    connect(add, SIGNAL(triggered(bool)), this, SLOT(addDownload()));
-
-    remove = new QAction("Remove", this);
-    fileMenu->addAction(remove);
-    remove->setShortcut(QKeySequence::Delete);
-    connect(remove, SIGNAL(triggered(bool)), this, SLOT(removeDownload()));
-
-    fileMenu->addSeparator();
-
-    auto exitFromProgram = new QAction("Exit", this);
-    fileMenu->addAction(exitFromProgram);
-    exitFromProgram->setShortcut(QKeySequence::Quit);
-    connect(exitFromProgram, SIGNAL(triggered(bool)), this, SLOT(close()));
 }

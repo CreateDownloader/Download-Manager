@@ -5,6 +5,7 @@ DownloadProcess::DownloadProcess(QUrl url, DownloadTable *dataModel){
     this->dataModel = dataModel;
     this->url = url;
 
+    downloadTime.start();
     manager = new QNetworkAccessManager(this);
 }
 
@@ -12,10 +13,16 @@ void DownloadProcess::start(){
     QNetworkRequest request(url);
     currentDownload = manager->get(request);
 
-    downloadTime.start();
-
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(downloadFinished(QNetworkReply*)));
     connect(currentDownload, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64)));
+}
+
+void DownloadProcess::abort(){
+    disconnect(manager, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(downloadFinished(QNetworkReply*)));
+    disconnect(currentDownload, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64)));
+
+    currentDownload->abort();
+    currentDownload = nullptr;
 }
 
 QString DownloadProcess::sizeHuman(qint64 fileSize){

@@ -21,13 +21,15 @@ public:
     bool saveToDisk(const QString&, QIODevice*);
     QString getDownloadUrl();
     void download(QUrl &);
-    void setupDownload();
     void save();
     void load();
 public slots:
     void downloadFinished(QNetworkReply*);
     void showDownloadedFileLocation(QModelIndex);
     void remove();
+    void start();
+    void abort();
+    void resume();
 protected:
     QPair<int, QString> currentSelectedRowWithFilename();
     void insertDownloadingFilenameInTable(const QString);

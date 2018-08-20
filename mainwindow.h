@@ -10,9 +10,6 @@ class MainWindow : public QMainWindow{
     Q_OBJECT
 public:
     MainWindow();
-public slots:
-    void addDownload();
-    void removeDownload();
 protected:
     void startUpAnimation();
 private:
@@ -20,6 +17,8 @@ private:
     void setup();
     QAction *add = nullptr;
     QAction *remove = nullptr;
+    QAction *abort = nullptr;
+    QAction *resume = nullptr;
 
 };
 
