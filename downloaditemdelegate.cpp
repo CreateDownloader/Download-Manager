@@ -34,7 +34,8 @@ void DownloadItemDelegate::paint(QPainter *painter,
         QStyledItemDelegate::paint(painter, option, index);
 }
 
-QSize DownloadItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const{
+QSize DownloadItemDelegate::sizeHint(const QStyleOptionViewItem &option,
+                                     const QModelIndex &index) const{
     Q_UNUSED(index);
     return option.widget->size();
 }

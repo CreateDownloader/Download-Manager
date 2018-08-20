@@ -42,16 +42,18 @@ QVariant DownloadTable::data(const QModelIndex &index, int role) const{
 
     if(index.isValid() && role == Qt::DisplayRole){
         const auto & dataInfo = downloadsInfo.at(index.row());
-        if(index.column() == 0)
-            return dataInfo.name;
-        else if(index.column() == 1)
-            return dataInfo.progress;
-        else if(index.column() == 2)
-            return dataInfo.size;
-        else if(index.column() == 3)
-            return dataInfo.speed;
-        else if(index.column() == 4)
-            return dataInfo.timeLeft;
+        switch(index.column()){
+            case 0:
+                 return dataInfo.name;
+            case 1:
+                return dataInfo.progress;
+            case 2:
+                return dataInfo.size;
+            case 3:
+                return dataInfo.speed;
+            case 4:
+                return dataInfo.timeLeft;
+        }
     }
 
     if(role == Qt::TextAlignmentRole)
@@ -91,29 +93,29 @@ bool DownloadTable::setData(const QModelIndex &index, const QVariant &value, int
     if(!index.isValid())  return false;
 
     if(role == Qt::EditRole){
-        auto setDataInfo = downloadsInfo.value(index.row());
+        auto downloadProcessInfo = downloadsInfo.value(index.row());
 
         switch(index.column()){
             case 0:
-                setDataInfo.name = value.toString();
+                downloadProcessInfo.name = value.toString();
                 break;
             case 1:
-                 setDataInfo.progress = value.toInt();
+                 downloadProcessInfo.progress = value.toInt();
                 break;
             case 2:
-                setDataInfo.size = value.toString();
+                downloadProcessInfo.size = value.toString();
                 break;
             case 3:
-                setDataInfo.speed = value.toString();
+                downloadProcessInfo.speed = value.toString();
                 break;
             case 4:
-                setDataInfo.timeLeft = value.toString();
+                downloadProcessInfo.timeLeft = value.toString();
                 break;
             default:
                 return false;
         }
 
-        downloadsInfo.replace(index.row(), setDataInfo);
+        downloadsInfo.replace(index.row(), downloadProcessInfo);
         emit dataChanged(index, index);
         return true;
     }

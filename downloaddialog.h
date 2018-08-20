@@ -3,8 +3,6 @@
 
 #include <QDialog>
 #include <QLineEdit>
-#include <QLabel>
-#include <QPushButton>
 
 
 class DownloadDialog : public QDialog{

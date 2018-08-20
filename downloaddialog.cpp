@@ -3,6 +3,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QPushButton>
 
 
 DownloadDialog::DownloadDialog(){
