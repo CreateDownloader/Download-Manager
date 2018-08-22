@@ -11,6 +11,8 @@
 #include <QHBoxLayout>
 #include <QCheckBox>
 
+#include <QDebug>
+
 
 DownloadWidget::DownloadWidget(QWidget *parent)
     : QTableView(parent){
@@ -76,7 +78,7 @@ void DownloadWidget::resume(){
 
     if(downloads.contains(filename)){
         auto currentDownloadProcess = downloads[filename];
-        currentDownloadProcess->start();
+        if(!currentDownloadProcess->isRunning()) currentDownloadProcess->start();
     }
 }
 
@@ -88,7 +90,7 @@ void DownloadWidget::abort(){
 
     if(downloads.contains(filename)){
         auto currentDownloadProcess = downloads[filename];
-        currentDownloadProcess->abort();
+        if(currentDownloadProcess->isRunning()) currentDownloadProcess->abort();
     }
 }
 
@@ -175,7 +177,7 @@ void DownloadWidget::start(){
     QString downloadUrl = getDownloadUrl();
     QUrl url = QUrl::fromEncoded(downloadUrl.toLocal8Bit());
 
-    if(downloads.contains(url.fileName())){
+    if(downloadTable->filenameExist(url.fileName())){
         QMessageBox::information(this, "Duplicate data!",
                                  tr("There is %1 already in downloads!").arg(url.fileName()));
         return;
@@ -203,6 +205,7 @@ bool DownloadWidget::isHttpRedricted(QNetworkReply *reply){
 
 void DownloadWidget::downloadFinished(QNetworkReply *reply){
     QUrl url = reply->url();
+    downloads.remove(url.fileName());
 
     if(!reply->error()){
         if(isHttpRedricted(reply)) QMessageBox::information(this, "Redricted", "HTTP Redricted");
@@ -230,6 +233,9 @@ void DownloadWidget::save(){
                     stream << downloadTable->data(index, Qt::DisplayRole);
             }
         }
+
+        foreach(QString key, downloads.keys())
+            stream<<downloads.value(key)->getUrl();
     }
 
     file.close();
@@ -251,6 +257,17 @@ void DownloadWidget::load(){
                     index = downloadTable->index(i, j);
                     downloadTable->setData(index, stream, Qt::EditRole);
             }
+        }
+
+        while(!stream.atEnd()){
+            QUrl url;
+            stream >> url;
+
+            DownloadProcess *downloadProcess;
+            downloadProcess = new DownloadProcess(url, downloadTable);
+            downloads[url.fileName()] = downloadProcess;
+
+            connect(downloadProcess, SIGNAL(downloadFinished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
         }
     }
 
