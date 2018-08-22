@@ -123,16 +123,16 @@ bool DownloadTable::setData(const QModelIndex &index, const QVariant &value, int
     return false;
 }
 
-int DownloadTable::getRowOfDownloadByName(const QString & findName) const{
-    for(auto it = downloadsInfo.begin(); it != downloadsInfo.end(); it++){
-        if(it->name == findName){
-            singleDownloadInfo checkIndex;
-            checkIndex.name = findName;
-            return downloadsInfo.indexOf(checkIndex);
-        }
-    }
+bool DownloadTable::filenameExist(const QString filename){
+    singleDownloadInfo checkFilename;
+    checkFilename.name = filename;
+    return downloadsInfo.contains(checkFilename);
+}
 
-    return -1;
+int DownloadTable::getRowOfDownloadByName(const QString &findName) const{
+    singleDownloadInfo checkFilename;
+    checkFilename.name = findName;
+    return downloadsInfo.contains(checkIndex) ? downloadsInfo.indexOf(checkIndex) : -1;
 }
 
 Qt::ItemFlags DownloadTable::flags(const QModelIndex &index) const{

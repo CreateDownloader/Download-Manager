@@ -34,6 +34,7 @@ public:
     bool insertRows(int row, int count, const QModelIndex &parent) override;
     bool removeRows(int row, int count, const QModelIndex &parent) override;
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    bool filenameExist(const QString);
     QList<singleDownloadInfo> getDownloadsInfo() const;
 private:
     QList<singleDownloadInfo> downloadsInfo;
