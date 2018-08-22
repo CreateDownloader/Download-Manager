@@ -18,6 +18,7 @@ public:
     void start();
     void abort();
     const QUrl &getUrl() const;
+    bool isRunning();
 signals:
     void downloadFinished(QNetworkReply*);
 public slots:

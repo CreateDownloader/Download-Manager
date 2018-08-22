@@ -95,6 +95,10 @@ void DownloadProcess::downloadProgress(qint64 received, qint64 total){
     dataModel->setData(index, timeLeft, Qt::EditRole);
 }
 
+bool DownloadProcess::isRunning(){
+    return currentDownload != nullptr;
+}
+
 const QUrl & DownloadProcess::getUrl() const{
     return url;
 }
