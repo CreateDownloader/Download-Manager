@@ -132,7 +132,7 @@ bool DownloadTable::filenameExist(const QString filename){
 int DownloadTable::getRowOfDownloadByName(const QString &findName) const{
     singleDownloadInfo checkFilename;
     checkFilename.name = findName;
-    return downloadsInfo.contains(checkIndex) ? downloadsInfo.indexOf(checkIndex) : -1;
+    return downloadsInfo.contains(checkFilename) ? downloadsInfo.indexOf(checkFilename) : -1;
 }
 
 Qt::ItemFlags DownloadTable::flags(const QModelIndex &index) const{
