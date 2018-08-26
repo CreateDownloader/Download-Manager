@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QRect>
 #include <QStatusBar>
+#include <QSettings>
 
 
 MainWindow::MainWindow(){
@@ -13,7 +14,12 @@ MainWindow::MainWindow(){
     setWindowTitle("Download Manager");
     setCentralWidget(downloader);
     setup();
+    loadSettings();
     startUpAnimation();
+}
+
+MainWindow::~MainWindow(){
+    saveSettings();
 }
 
 void MainWindow::setup(){
@@ -51,17 +57,27 @@ void MainWindow::setup(){
 
 void MainWindow::startUpAnimation(){
     QPropertyAnimation *fadein_animation = new QPropertyAnimation(this, "windowOpacity", this);
+
     fadein_animation->setStartValue(0);
     fadein_animation->setEndValue(1);
     fadein_animation->setDuration(410);
-
-    QRect desktop = QApplication::desktop()->screenGeometry();
-    QPoint point = desktop.center();
-
-    QPropertyAnimation *move_animation = new QPropertyAnimation(this, "geometry");
-    move_animation->setDuration(400);
-    move_animation->setEndValue(QRect(point.x() - 1000 * 0.5, point.y() - 600 * 0.5, 1000, 600));
-
     fadein_animation->start();
-    move_animation->start();
+}
+
+void MainWindow::saveSettings(){
+    QSettings settings("Download Manager", "Dimensions");
+
+    settings.beginGroup("MainWindow");
+    settings.setValue("size", size());
+    settings.setValue("pos", pos());
+    settings.endGroup();
+}
+
+void MainWindow::loadSettings(){
+    QSettings settings("Download Manager", "Dimensions");
+
+    settings.beginGroup("MainWindow");
+    resize(settings.value("size", QSize(960, 640)).toSize());
+    move(settings.value("pos", QPoint(50, 50)).toPoint());
+    settings.endGroup();
 }

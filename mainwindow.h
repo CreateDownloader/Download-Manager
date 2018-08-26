@@ -10,8 +10,11 @@ class MainWindow : public QMainWindow{
     Q_OBJECT
 public:
     MainWindow();
+    ~MainWindow();
 protected:
     void startUpAnimation();
+    void saveSettings();
+    void loadSettings();
 private:
     DownloadWidget *downloader = nullptr;
     void setup();
