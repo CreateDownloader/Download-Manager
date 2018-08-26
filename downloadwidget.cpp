@@ -19,11 +19,11 @@ DownloadWidget::DownloadWidget(QWidget *parent)
     downloadTable = new DownloadTable;
     downloadPainter = new DownloadItemDelegate;
     setup();
-    load();
+    loadSession();
 }
 
 DownloadWidget::~DownloadWidget(){
-    save();
+    saveSession();
 }
 
 void DownloadWidget::setup(){
@@ -217,7 +217,7 @@ void DownloadWidget::downloadFinished(QNetworkReply *reply){
     } else QMessageBox::warning(this, "Error", tr("Download error %1").arg(reply->errorString()));
 }
 
-void DownloadWidget::save(){
+void DownloadWidget::saveSession(){
     QFile file(".downloadManagerSession");
 
     if(file.open(QIODevice::WriteOnly)){
@@ -241,7 +241,7 @@ void DownloadWidget::save(){
     file.close();
 }
 
-void DownloadWidget::load(){
+void DownloadWidget::loadSession(){
     QFile file(".downloadManagerSession");
 
     if(file.open(QIODevice::ReadOnly)){

@@ -21,8 +21,6 @@ public:
     bool saveToDisk(const QString&, QIODevice*);
     QString getDownloadUrl();
     void download(QUrl &);
-    void save();
-    void load();
 public slots:
     void downloadFinished(QNetworkReply*);
     void showDownloadedFileLocation(QModelIndex);
@@ -33,6 +31,8 @@ public slots:
 protected:
     QPair<int, QString> currentSelectedRowWithFilename();
     void insertDownloadingFilenameInTable(const QString);
+    void saveSession();
+    void loadSession();
 private:
     void setup();
     DownloadTable *downloadTable = nullptr;
