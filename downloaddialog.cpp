@@ -26,7 +26,7 @@ void DownloadDialog::setup(){
     buttonsLayout->addWidget(okButton);
     buttonsLayout->addWidget(cancelButton);
 
-    dataLayout->addLayout(buttonsLayout, 1, 1, Qt::AlignRight);
+    dataLayout->addLayout(buttonsLayout, 1, 1, Qt::AlignCenter);
 
     QVBoxLayout  *mainLayout;
     mainLayout = new QVBoxLayout;
