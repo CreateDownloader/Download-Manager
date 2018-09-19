@@ -1,5 +1,7 @@
 #include "downloaditemdelegate.h"
 
+#include <QTextCharFormat>
+#include <QTextCursor>
 #include <QApplication>
 
 
@@ -26,8 +28,16 @@ void DownloadItemDelegate::paint(QPainter *painter,
      } else if(index.column() != 1 && index.isValid()){
         QStyleOptionViewItem customText(option);
 
+        QTextCharFormat format;
+        format.setTextOutline(QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+
+        QTextCursor cursor;
+        cursor.select(QTextCursor::Document);
+        cursor.mergeCharFormat(format);
+
         customText.font.setWeight(600);
         customText.palette.setColor(QPalette::HighlightedText, "#D19F49");
+        customText.palette.setColor(QPalette::Highlight, "#0995DB");
 
         QStyledItemDelegate::paint(painter, customText, index);
      } else
