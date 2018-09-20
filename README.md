@@ -1,3 +1,5 @@
+
+
 # Manage the downloading data.
 
 Charming manager helps you to easily track downloading stuff from the Internet.
@@ -38,7 +40,7 @@ void DownloadProcess::start(){
 
 Analogously  `abort` method stop the download and <b>disconnect</b> `currentDownload` and `manager`
 
-### Download Process.
+### Download process.
 
 Track data about the downloading process and show it in the data table.
 
@@ -90,7 +92,7 @@ void DownloadProcess::downloadProgress(qint64 received, qint64 total){
 
 ### Single download info.
 
-`DownloadTable` has a `QList` of `singleDownloadInfo` struct which contains necessary info.
+`DownloadTable` has a `QList` of `singleDownloadInfo` struct which contains necessary info about the download process.
 
 ```cpp
 struct singleDownloadInfo{
@@ -135,15 +137,11 @@ void DownloadWidget::start(){
 ```
 - `QString downloadUrl = getDownloadUrl();` Start download dialog and return URL to data.
 - `QUrl url = QUrl::fromEncoded(downloadUrl.toLocal8Bit());` Convert to `QUrl`
-- `if(downloadTable->filenameExist(url.fileName()))` Check if this download file exists.
-	
-	- On true show dialog and return.
-- `if(!downloadUrl.isEmpty())` Check if URL is not empty.
-
-	- ` QRegularExpression urlRegex("^(?:http|ftp)s?://");` Prepare regex to validate if URL is correct address to data.
-	
-		- `if(!match.hasMatch())` On not valid show dialog and return.
-
+- `if(downloadTable->filenameExist(url.fileName()))` Check for this download file exists.
+    - On true show dialog and return.
+- `if(!downloadUrl.isEmpty())` Check for URL is not empty.
+    - ` QRegularExpression urlRegex("^(?:http|ftp)s?://");` Prepare regex to validate for URL is correct address to data.
+        - `if(!match.hasMatch())` On not valid show dialog and return.
 - `insertDownloadingFilenameInTable(url.fileName());` Put filename into table.
 - `download(url);` Start the download process.
 
@@ -160,7 +158,7 @@ QString DownloadWidget::getDownloadUrl(){
     return getUrl;
 }
 ```
-- `if(dialog.exec()) getUrl = dialog.downloadUrl->text();` On the dialog, work convert `downloadUrl` to text and assign it into `getUrl` and return.
+- `if(dialog.exec()) getUrl = dialog.downloadUrl->text();` On the dialog work convert `downloadUrl` to text and assign it into `getUrl` and return.
 
 ### Download.
 
@@ -177,11 +175,9 @@ void DownloadWidget::download(QUrl &url){
 }
 ``` 
 - `downloadProcess = new DownloadProcess(url, downloadTable);` Initialize with url and pointer to the data table.
-
-	- The pointer is required to correctly put pieces of information about the download process into the single row.
-
+    - The pointer is required to correctly put pieces of information about the download process into the single row.
 - `downloads[url.fileName()] = downloadProcess;` `downloads` which is hashmap is used to locate currently working download process.
-- Build connection on finish download.
+- <b>connect</b> `downloadProcess` on finish download.
 
 ### Download finished.
 
@@ -205,11 +201,9 @@ void DownloadWidget::downloadFinished(QNetworkReply *reply){
 - `QUrl url = reply->url();` Get url to downloaded data, `reply` contains informations about the server where data comes.
 - `downloads.remove(url.fileName());` Data downloaded, the manager doesn't need it anymore.
 - `if(!reply->error())` Check connection errors happened.
-
-	- `if(isHttpRedricted(reply))` Is http redricted?
-	-  The connection is fix and download finished. 
-		
-		- `if(saveToDisk(filename, reply)` Try to save data to disk.
+    - `if(isHttpRedricted(reply))` Is HTTP redricted?
+    -  The connection is fix and download finished. 
+        - `if(saveToDisk(filename, reply)` Try to save data to disk.
 
 ### Save to disk.
 
@@ -228,8 +222,7 @@ bool DownloadWidget::saveToDisk(const QString & filename, QIODevice *data){
 - `QFile file(filename);` Save with downloaded filename.
 - `if(!file.open(QIODevice::WriteOnly))` IO errors happened?
 - Everything is fix.
-	
-	- `file.write(data->readAll());` Write data.
+    - `file.write(data->readAll());` Write data.
 
 ## Session.
 
@@ -262,7 +255,8 @@ void DownloadWidget::saveSession(){
 ```
 - First are numbers of row and column of the data table.
 - Second is downloads pieces of information.
-- If `downloads` contains some data, save URLs.
+- On `downloads` contains some data.
+    - Save URLs.
 
 #### On program start `DownloadWidget` load session.
 
@@ -302,8 +296,7 @@ void DownloadWidget::loadSession(){
 ```
 - Build `DownloadTable` and put all the data.
 - `while(!stream.atEnd())` While contains URLs.
-
-	- `stream >> url;` Get URL.
-	- `downloadProcess = new DownloadProcess(url, downloadTable);` Prepare the download process.
-	- `downloads[url.fileName()] = downloadProcess;` Put filename into `downloads`
-    - Build download finished the connection .
+    - `stream >> url;` Get URL.
+    - `downloadProcess = new DownloadProcess(url, downloadTable);` Prepare the download process.
+    - `downloads[url.fileName()] = downloadProcess;` Put filename into `downloads`
+    - <b>connect</b> `downloadProcess` on download finished.
