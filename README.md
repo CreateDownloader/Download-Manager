@@ -1,12 +1,11 @@
 
-
 # Manage the downloading data.
 
 Charming manager helps you to easily track downloading stuff from the Internet.
 
 ![manager](images/manager1.png)
 
-It informs about the download finish.
+<b>It informs about the download finish.</b>
 
 ![manager](images/manager2.png)
 
@@ -35,14 +34,14 @@ void DownloadProcess::start(){
     connect(currentDownload, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64)));
 }
 ```
-- <b>connect</b> `currentDownload`  monitor information about the downloading process.
-- <b>connect</b> `manager` call when the process is finished.
+- <b>connect</b> `currentDownload`  track pieces of information about the downloading process.
+- <b>connect</b> `manager` call when the download process is finished.
 
 Analogously  `abort` method stop the download and <b>disconnect</b> `currentDownload` and `manager`
 
 ### Download process.
 
-Track data about the downloading process and show it in the data table.
+Track data about the downloading process and put it in the table.
 
 ![downloading](https://thumbs.gfycat.com/ImpressivePaltryIberianchiffchaff-size_restricted.gif)
 
