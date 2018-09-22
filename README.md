@@ -39,7 +39,7 @@ void DownloadProcess::start(){
 
 Analogously  `abort` method stop the download and <b>disconnect</b> `currentDownload` and `manager`
 
-### Download process.
+### Download progress.
 
 Track data about the downloading process and put it in the table.
 
