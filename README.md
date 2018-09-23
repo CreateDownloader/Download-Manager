@@ -233,13 +233,13 @@ void DownloadWidget::saveSession(){
 
     if(file.open(QIODevice::WriteOnly)){
         QDataStream stream(&file);
-        int n = downloadTable->rowCount(QModelIndex());
-        int m = downloadTable->columnCount(QModelIndex());
-        stream<<n<<m;
+        int row = downloadTable->rowCount(QModelIndex());
+        int column = downloadTable->columnCount(QModelIndex());
+        stream<<row<<column;
 
         QModelIndex index;
-        REP(i, n){
-                REP(j, m){
+        REP(i, row){
+                REP(j, column){
                     index = downloadTable->index(i, j, QModelIndex());
                     stream << downloadTable->data(index, Qt::DisplayRole);
             }
@@ -265,14 +265,14 @@ void DownloadWidget::loadSession(){
 
     if(file.open(QIODevice::ReadOnly)){
         QDataStream stream(&file);
-        int n, m;
+        int row, column;
 
-        stream >> n >> m;
-        downloadTable->insertRows(0, n, QModelIndex());
+        stream >> row >> column;
+        downloadTable->insertRows(0, row, QModelIndex());
 
         QModelIndex index;
-        REP(i, n){
-                REP(j, m){
+        REP(i, row){
+                REP(j, column){
                     index = downloadTable->index(i, j);
                     downloadTable->setData(index, stream, Qt::EditRole);
             }
