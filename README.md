@@ -6,6 +6,8 @@
 
  [![Build SGet Download Manager](https://user-images.githubusercontent.com/12082147/37241993-9d34faec-246a-11e8-8188-dc66547023bc.png)](https://github.com/blooser/Download-Manager) 
 
+[![Build Downloader](https://raw.githubusercontent.com/CreateDownloader/KugouDownloader/master/Download.PNG)](https://github.com/CreateDownloader/Download-Manager/releases/tag/v1.0)
+
 # Manage the downloading data.
 
 Charming manager helps you to easily track downloading stuff from the Internet.
@@ -16,7 +18,6 @@ Charming manager helps you to easily track downloading stuff from the Internet.
 
 ![manager](images/manager2.png)
 
-[![Build Downloader](https://raw.githubusercontent.com/CreateDownloader/KugouDownloader/master/Download.PNG)](https://github.com/CreateDownloader/SGet/releases/tag/v1.0)
 
 ***
 ## Architecture.
